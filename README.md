@@ -17,3 +17,7 @@ AI自动化处理：自动分段、生成摘要、创建Q&A对、提取知识图
 知识图谱可视化 自动构建概念关系网络
 
 🌐 多模型支持 兼容 OpenAI GPT、DeepSeek、Moonshot AI、Ollama 等主流大模型，支持本地模型部署
+![image](https://github.com/user-attachments/assets/c0dcfb60-f34f-4ef4-aa47-da8409397504)
+![image](https://github.com/user-attachments/assets/5f316402-105c-4224-ac7e-e8cc409d2662)
+![image](https://github.com/user-attachments/assets/e92b98fc-2244-4958-addc-3657fbbfe3c3)
+![image](https://github.com/user-attachments/assets/ac485891-ab25-4b99-bd1d-93dd5742cca7)
