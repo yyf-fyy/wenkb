@@ -20,4 +20,6 @@ AI自动化处理：自动分段、生成摘要、创建Q&A对、提取知识图
 ![image](https://github.com/user-attachments/assets/c0dcfb60-f34f-4ef4-aa47-da8409397504)
 ![image](https://github.com/user-attachments/assets/5f316402-105c-4224-ac7e-e8cc409d2662)
 ![image](https://github.com/user-attachments/assets/e92b98fc-2244-4958-addc-3657fbbfe3c3)
-![image](https://github.com/user-attachments/assets/ac485891-ab25-4b99-bd1d-93dd5742cca7)
+![image](https://github.com/user-attachments/assets/9ad13542-c68b-4eb3-a533-805d75a3b480)
+![image](https://github.com/user-attachments/assets/74d4c525-caca-482a-89c8-f8bacc0cf099)
+
