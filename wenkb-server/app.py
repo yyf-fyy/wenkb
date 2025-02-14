@@ -77,4 +77,4 @@ def repositoryList():
   return 'hello world'
 
 if __name__ == '__main__':
-  uvicorn.run(app, host='0.0.0.0', port=6088, log_level='debug')
+  uvicorn.run(app, host='0.0.0.0', port=16088, log_level='debug')

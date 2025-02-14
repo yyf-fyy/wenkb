@@ -59,22 +59,22 @@ export default defineConfig(async () => ({
   // 2. tauri expects a fixed port, fail if that port is not available
   server: {
     host: host || false,
-    port: 1420,
+    port: 11420,
     strictPort: true,
     proxy: {
       // 带选项写法（对象）
       '/api': {
-        target: 'http://127.0.0.1:6088',                      // 从环境变量文件取值
+        target: 'http://127.0.0.1:16088',                      // 从环境变量文件取值
         changeOrigin: true,                             // 支持跨域
         rewrite: (path) => path.replace(/^\/api/, ''),  // 路径重写
       },
       '/static': {
-        target: 'http://127.0.0.1:6088',                      // 从环境变量文件取值
+        target: 'http://127.0.0.1:16088',                      // 从环境变量文件取值
         changeOrigin: true,                             // 支持跨域
         rewrite: (path) => path.replace(/^\/api/, ''),  // 路径重写
       },
       '/ws': {
-        target: 'ws://127.0.0.1:6088',                      // 从环境变量文件取值
+        target: 'ws://127.0.0.1:16088',                      // 从环境变量文件取值
         changeOrigin: true,                             // 支持跨域
         ws: true
       }
@@ -83,7 +83,7 @@ export default defineConfig(async () => ({
       ? {
           protocol: 'ws',
           host: host,
-          port: 1430,
+          port: 11430,
         }
       : undefined,
     watch: {

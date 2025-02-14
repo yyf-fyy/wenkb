@@ -43,4 +43,4 @@ if __name__ == '__main__':
       "level": "ERROR",
     },
   }
-  uvicorn.run(app, host='0.0.0.0', port=6088, log_level='error', log_config=log_config)
+  uvicorn.run(app, host='0.0.0.0', port=16088, log_level='error', log_config=log_config)
