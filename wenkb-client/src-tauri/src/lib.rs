@@ -58,7 +58,7 @@ fn start_backend(app: &mut tauri::App) {
     }
   });
   tauri::async_runtime::spawn(async move {
-    let url = "http://localhost:6088".to_string();
+    let url = "http://localhost:16088".to_string();
     loop {
       match reqwest::get(&url).await {
         Ok(_) => {
