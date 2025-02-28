@@ -17,9 +17,14 @@ AI自动化处理：自动分段、生成摘要、创建Q&A对、提取知识图
 知识图谱可视化 自动构建概念关系网络
 
 🌐 多模型支持 兼容 OpenAI GPT、DeepSeek、Moonshot AI、Ollama 等主流大模型，支持本地模型部署
-![image](https://github.com/user-attachments/assets/c0dcfb60-f34f-4ef4-aa47-da8409397504)
-![image](https://github.com/user-attachments/assets/5f316402-105c-4224-ac7e-e8cc409d2662)
-![image](https://github.com/user-attachments/assets/e92b98fc-2244-4958-addc-3657fbbfe3c3)
-![image](https://github.com/user-attachments/assets/9ad13542-c68b-4eb3-a533-805d75a3b480)
-![image](https://github.com/user-attachments/assets/74d4c525-caca-482a-89c8-f8bacc0cf099)
+<img width="1025" alt="2025-02-28_122336" src="https://github.com/user-attachments/assets/c77c287a-73eb-44c5-b1cb-5d254665fedb" />
+<img width="1025" alt="2025-02-28_122356" src="https://github.com/user-attachments/assets/63a666ec-8fa3-434d-8947-9a1885911474" />
+<img width="1025" alt="2025-02-28_122407" src="https://github.com/user-attachments/assets/3529d3ab-e657-4fbd-8f15-dbef671ac3f8" />
+<img width="1280" alt="2025-02-28_122422" src="https://github.com/user-attachments/assets/0782b476-6fc2-492d-bfeb-a69bd3350105" />
+<img width="1280" alt="2025-02-28_122446" src="https://github.com/user-attachments/assets/0fba822d-f1b7-4202-9bcc-7241679b7ea8" />
+<img width="1280" alt="2025-02-28_122528" src="https://github.com/user-attachments/assets/a6c4f401-5bde-4a4d-b481-62e4b7786b70" />
+<img width="1280" alt="2025-02-28_122535" src="https://github.com/user-attachments/assets/00d7d222-e269-429d-abe1-9c6eb613f86b" />
+<img width="1280" alt="2025-02-28_122551" src="https://github.com/user-attachments/assets/fa0cf583-127d-4e7b-a3b4-b7735d01eefd" />
+<img width="1280" alt="2025-02-28_122631" src="https://github.com/user-attachments/assets/be51245e-cb54-4872-9a24-a8c3e93c0011" />
+<img width="1280" alt="2025-02-28_122642" src="https://github.com/user-attachments/assets/809a4ea1-902b-4860-a03e-2c0144dc11ee" />
 
