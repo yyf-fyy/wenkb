@@ -12,11 +12,7 @@ AI自动化处理：自动分段、生成摘要、创建Q&A对、提取知识图
 
 对话式交互：支持追问、溯源引用、多轮知识推理
 
-答案精炼：可指定摘要长度、知识范围、输出格式
-
-知识图谱可视化 自动构建概念关系网络
-
-🌐 多模型支持 兼容 OpenAI GPT、DeepSeek、Moonshot AI、Ollama 等主流大模型，支持本地模型部署
+🌐 多模型支持 兼容 OpenAI GPT、DeepSeek、Moonshot AI等主流大模型，支持连接Ollama本地模型部署。
 <img width="1025" alt="2025-02-28_122336" src="https://github.com/user-attachments/assets/c77c287a-73eb-44c5-b1cb-5d254665fedb" />
 <img width="1025" alt="2025-02-28_122356" src="https://github.com/user-attachments/assets/63a666ec-8fa3-434d-8947-9a1885911474" />
 <img width="1025" alt="2025-02-28_122407" src="https://github.com/user-attachments/assets/3529d3ab-e657-4fbd-8f15-dbef671ac3f8" />
