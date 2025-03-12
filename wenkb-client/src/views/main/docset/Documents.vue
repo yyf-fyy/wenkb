@@ -115,7 +115,7 @@
         :render-prefix="renderTreeItemPrefix"
         :render-suffix="renderTreeItemSuffix"
         :cancelable="false"
-        selectable expand-on-click
+        selectable
         :on-update:selected-keys="onSelectedKeysChange"
         :on-update:expanded-keys="onExpandedKeysChange"
       />
