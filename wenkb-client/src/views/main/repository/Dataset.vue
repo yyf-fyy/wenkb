@@ -46,6 +46,12 @@
         color: var(--primary-color);
       }
     }
+    .kb-dataset-filetype {
+      cursor: pointer;
+      &:hover {
+        color: var(--primary-color);
+      }
+    }
   }
   &-chunk-container {
     position: absolute;
@@ -60,6 +66,7 @@
 <template>
   <div class="kb-dataset">
     <dataset-extend v-if="selectedId" class="kb-dataset-chunk-container" :reposId="reposId" :dtsetId="selectedId" :dtsetNm="selectedNm" :authEdit="authEdit" @on-turn-back="() => selectedId = ''" />
+    <dataset-file-view ref="fileViewRef" />
     <div style="height: 100%;" v-show="!selectedId">
       <div class="kb-dataset-header">
         <div class="title">
@@ -92,6 +99,7 @@
             :columns="columns"
             :data="datasetList"
             :pagination="pagination"
+            @update:sorter="onSorterChange"
             @update:page="onInitDatasetList"
             :scroll-x="1200"
           />
@@ -102,10 +110,10 @@
 </template>
 <script>
   import { defineComponent, ref, getCurrentInstance, h } from 'vue'
-  import { NTag, NBadge, NSpace, NSwitch, NButton, NIcon, NDropdown, useDialog } from 'naive-ui'
+  import { NTag, NBadge, NSpace, NSwitch, NButton, NIcon, NDropdown, useDialog, useMessage } from 'naive-ui'
   import _ from 'lodash'
   import { renderIconfontIcon, dialogCreate, dialogConfirm } from '@/libs/utils'
-  import { deepCopy } from '@/libs/tools'
+  import { deepCopy, bytesToSize } from '@/libs/tools'
   import { DATASET_INDEX_STATUS_TYPE, DATASET_ENABLE_STATUS_TYPE, FILE_TYPE_ICON_MAP } from '@/libs/enum'
   import DocumentImportForm from './form/DocumentImportForm.vue'
   import LinkImportForm from './form/LinkImportForm.vue'
@@ -114,10 +122,11 @@
   import DatasetExtend from './dataset/DatasetExtend.vue'
   import DatasetCatalog from './dataset/DatasetCatalog.vue'
   import DatasetIndexError from './dataset/DatasetIndexError.vue'
+  import DatasetFileView from './dataset/DatasetFileView.vue'
 
   export default defineComponent({
     components: {
-      DatasetExtend, DatasetCatalog
+      DatasetExtend, DatasetCatalog, DatasetFileView
     },
     props: {
       reposId: {
@@ -130,6 +139,7 @@
     },
     setup(props) {
       const { proxy, ctx } = getCurrentInstance()
+      const message = useMessage()
       const reposId = props.reposId
       const authEdit = props.authEdit
       const dialog = useDialog()
@@ -144,7 +154,9 @@
         pageSize: 10,
         prefix ({ itemCount }) {
           return `总数 ${itemCount}`
-        }
+        },
+        orderName: '',
+        orderValue: ''
       })
       const catalogId = ref('')
       const onCatalogChange = (ctlgId) => {
@@ -159,7 +171,7 @@
               reposId, dtsetNm: inputValue.value, ctlgId: catalogId.value
             },
             pageBase: {
-              pageNum, pageSize: pagination.pageSize
+              pageNum, pageSize: pagination.pageSize, orderName: pagination.orderName, orderValue: pagination.orderValue
             }
           }).then(res => {
             datasetList.value = res.data || []
@@ -174,6 +186,37 @@
         }
       }
       onInitDatasetList()
+      
+      const setColumnsSortState = (columns, sorter) => {
+        columns.forEach(column => {
+          let children = column.children || []
+          if (children.length > 0) {
+            setColumnsSortState(children, sorter)
+          }
+          if (column.sortOrder === undefined)
+            return
+          if (!sorter) {
+            column.sortOrder = false
+            return
+          }
+          if (column.key === sorter.columnKey)
+            column.sortOrder = sorter.order
+          else column.sortOrder = false
+        })
+      }
+
+      const onSorterChange = (sorter) => {
+        if (!sorter) {
+          return
+        }
+        let columnKey = sorter.columnKey
+        let order = sorter.order // ascend, descend, false
+        pagination.orderName = !order ? '' : columnKey
+        pagination.orderValue = !order ? '' : order
+        onInitDatasetList()
+        setColumnsSortState(columns.value, sorter)
+      }
+
       const onInputChange = _.debounce((value) => {
         onInitDatasetList(1)
       }, 500)
@@ -262,12 +305,18 @@
           dataset: row
         })
       }
-
+      
       const rowOptions = ref([
         {
           label: '重建索引',
           key: 'reindex',
           icon: () => renderIconfontIcon('iconfont-kb icon-vector'),
+          disabled: !authEdit
+        },
+        {
+          label: '分段设置',
+          key: 'chunk',
+          icon: () => renderIconfontIcon('iconfont-kb icon-dataset1'),
           disabled: !authEdit
         },
         {
@@ -328,9 +377,14 @@
       }
 
       const onUpdateBuildStatus = (row, buildKey, buildValue) => {
+        let idxSts = row.idxSts
+        if (idxSts !== 'ready') {
+          message.warning('索引状态非就绪，无法构建增强索引')
+          return
+        }
         dialogConfirm(dialog, {
           title: '确认',
-          content: '这将花费额外的token，确定构建增强索引么？',
+          content: '这将花费额外的Token，确定构建增强索引么？',
           type: 'warning',
           loading: false,
           onPositiveClick: (e, dialog) => {
@@ -347,7 +401,11 @@
             return false
           }
         })
-          
+      }
+
+      const fileViewRef = ref()
+      const onFilePreview = (dataset) => {
+        fileViewRef.value.toggle(dataset)
       }
 
       const showIndexError = (dtsetId, type) => {
@@ -366,180 +424,205 @@
         idxSts: 'index', prcsSts: 'precis', qaSts: 'qanswer', tpltSts: 'triplet'
       }
       const createBuildStatusColumn = (title, key) => {
-        return { title, key, width: 100, render(row) {
-            let status = row[key]
-            let title = ''
-            if (authEdit) {
-              if (status === 'nobd') { // 不构建的状态下可以修改为构建，即新增，后台任务自动跑批
-                title = `鼠标点击构建${title}索引`
-              }
-            }
-            let color = {color: 'var(--primary-color-opacity-5)', borderColor: 'var(--primary-color-opacity-5)', textColor: 'var(--primary-color-opacity-2)'}
-            let type = ''
-            if (status === 'error') {
-              color = {}
-              type = 'error'
-            }
-            return h(
-              NTag,
-              {
-                color,
-                type,
-                title,
-                style: { cursor: 'pointer' },
-                onclick: () => {
-                  if (!authEdit) {
-                    return
-                  }
-                  if (status === 'nobd') { // 不构建的状态下可以修改为构建，即新增，后台任务自动跑批
-                    onUpdateBuildStatus(row, key, 'new')
-                  } else if (status === 'error') {
-                    showIndexError(row.dtsetId, statusKeyTypeMap[key])
-                  }
-                }
-              },
-              {
-                default: () => {
-                  return [
-                    h(
-                      NBadge,
-                      {
-                        dot: true,
-                        color: status === 'error' ? 'var(--error-color)' : 'var(--primary-color)',
-                        style: {
-                          marginRight: '4px',
-                          top: '-1px'
-                        }
-                      }
-                    ),
-                    DATASET_INDEX_STATUS_TYPE[status] || '未知'
-                  ]
-                }
-              })
+        return { title, key, width: 100, sorter: true, sortOrder: false, render(row) {
+          let status = row[key]
+          let title = ''
+          if (authEdit) {
+            if (status === 'nobd') { // 不构建的状态下可以修改为构建，即新增，后台任务自动跑批
+              title = `点击构建${title}索引`
             }
           }
+          let color = {color: 'var(--primary-color-opacity-5)', borderColor: 'var(--primary-color-opacity-5)', textColor: 'var(--primary-color-opacity-2)'}
+          let type = ''
+          if (status === 'error') {
+            color = {}
+            type = 'error'
+          }
+          return h(
+            NTag,
+            {
+              color,
+              type,
+              title,
+              style: { cursor: 'pointer' },
+              onclick: () => {
+                if (!authEdit) {
+                  return
+                }
+                if (status === 'nobd') { // 不构建的状态下可以修改为构建，即新增，后台任务自动跑批
+                  onUpdateBuildStatus(row, key, 'new')
+                } else if (status === 'error') {
+                  showIndexError(row.dtsetId, statusKeyTypeMap[key])
+                }
+              }
+            },
+            {
+              default: () => {
+                return [
+                  h(
+                    NBadge,
+                    {
+                      dot: true,
+                      color: status === 'error' ? 'var(--error-color)' : 'var(--primary-color)',
+                      style: {
+                        marginRight: '4px',
+                        top: '-1px'
+                      }
+                    }
+                  ),
+                  DATASET_INDEX_STATUS_TYPE[status] || '未知'
+                ]
+              }
+            })
+          }
+        }
       }
 
+      const columns = ref([
+        { title: '名称', key: 'dtsetNm', minWidth: 250, render(row) {
+          return h(
+            NSpace,
+            {},
+            {
+              default: () => {
+                return [
+                  h('span', {
+                    class: 'title',
+                    title: '查看数据集内容',
+                    onClick: () => {
+                      selectedId.value = row.dtsetId
+                      selectedNm.value = row.dtsetNm
+                    }
+                  }, row.dtsetNm + '.' + row.fileTyp)
+                ]
+              }
+            })
+          }
+        },
+        { title: '类型', key: 'fileTyp', align: 'center', width: 60, render(row) {
+          return h(
+            NIcon,
+            {
+              title: `${row.fileTyp}${authEdit ? ' 点击预览' : ''}`,
+              size: '22px',
+              class: `kb-dataset-filetype ${FILE_TYPE_ICON_MAP[row.fileTyp] || 'iconfont icon-file'}`,
+              onClick: () => {
+                if (authEdit) {
+                  onFilePreview(row)
+                }
+              }
+            }
+          )
+        } },
+        { title: '大小', key: 'fileSize', align: 'center', width: 85, render(row) {
+          let size = row.fileSize // 字节
+          let res = ''
+          if (size > 0) {
+            res = bytesToSize(size)
+          }
+          return h('span', {
+            style: {
+              display: 'inline-block',
+              fontSize: '12px',
+              transform: 'scale(0.75)'
+            }
+          }, res)
+        } },
+        { title: '状态', key: 'enbSts', align: 'center', titleAlign: 'left', width: 100, render(row) {
+          let label = DATASET_ENABLE_STATUS_TYPE[row.enbSts] || '未知'
+          return h(
+            NSwitch,
+            {
+              disabled: !authEdit,
+              value: row.enbSts === 'enb',
+              title: label,
+              'on-update:value': (value) => {
+                let enbSts = value ? 'enb' : 'une'
+                proxy.$api.put('/knb/dataset/enable/status', {
+                  dtsetId: row.dtsetId, enbSts
+                }).then(res => {
+                  row.enbSts = enbSts
+                }).catch(err => {
+                  console.error(err)
+                })
+              }
+            }, {
+              checked () { // slot
+                return '' // label
+              },
+              unchecked () {
+                return '' // label
+              }
+            })
+          }
+        },
+        createBuildStatusColumn('索引', 'idxSts'),
+        {
+          title: '增强索引', key: 'enhance', align: 'center',
+          children: [
+            createBuildStatusColumn('摘要', 'prcsSts'),
+            createBuildStatusColumn('Q&A', 'qaSts'),
+            createBuildStatusColumn('图谱', 'tpltSts'),
+          ]
+        },
+        { title: '操作', key: 'option', fixed: 'right', align: 'center', width: 100, render(row) {
+          let options = deepCopy(rowOptions.value)
+          if (authEdit) {
+            options.forEach(option => {
+              if (option.key === 'reindex') {
+                option.disabled = row.idxSts === 'new' || row.enbSts === 'une'
+              } else {
+                option.disabled = !authEdit
+              }
+            })
+          }
+          return h(
+            NDropdown,
+            {
+              options,
+              onSelect: (key) => {
+                switch (key) {
+                  case 'reindex':
+                    onRebuildIndex(row)
+                    break
+                  case 'chunk':
+                    onChunkSetting(row)
+                    break
+                  case 'edit':
+                    onEditDataset(row)
+                    break
+                  case 'delete':
+                    onRemoveDataset(row)
+                    break
+                }
+              }
+            },
+            h(
+              NButton,
+              {
+                size: 'small', secondary: true, type: 'primary'
+              },
+              h(
+                NIcon,
+                {
+                  class: 'iconfont icon-dotshorizontal'
+                }
+              )
+            )
+          )}
+        }
+      ])
+
       return {
+        fileViewRef,
         loading,
         datasetList,
         authEdit,
         pagination,
         inputValue,
         selectedId, selectedNm,
-        columns: [
-          { title: '名称', key: 'dtsetNm', minWidth: 250, render(row) {
-            return h(
-              NSpace,
-              {},
-              {
-                default: () => {
-                  return [
-                    h('span', {
-                      class: 'title',
-                      title: '查看数据集内容',
-                      onClick: () => {
-                        selectedId.value = row.dtsetId
-                        selectedNm.value = row.dtsetNm
-                      }
-                    }, row.dtsetNm)
-                  ]
-                }
-              })
-            }
-          },
-          { title: '类型', key: 'fileTyp', align: 'center', width: 60, render(row) {
-            return h(
-              NIcon,
-              {
-                title: row.fileTyp || '',
-                size: '22px',
-                class: FILE_TYPE_ICON_MAP[row.fileTyp] || 'iconfont icon-file'
-              }
-            )
-          } },
-          { title: '状态', key: 'enbSts', align: 'center', titleAlign: 'left', width: 100, render(row) {
-            let label = DATASET_ENABLE_STATUS_TYPE[row.enbSts] || '未知'
-            return h(
-              NSwitch,
-              {
-                disabled: !authEdit,
-                value: row.enbSts === 'enb',
-                title: label,
-                'on-update:value': (value) => {
-                  let enbSts = value ? 'enb' : 'une'
-                  proxy.$api.put('/knb/dataset/enable/status', {
-                    dtsetId: row.dtsetId, enbSts
-                  }).then(res => {
-                    row.enbSts = enbSts
-                  }).catch(err => {
-                    console.error(err)
-                  })
-                }
-              }, {
-                checked () { // slot
-                  return '' // label
-                },
-                unchecked () {
-                  return '' // label
-                }
-              })
-            }
-          },
-          createBuildStatusColumn('索引', 'idxSts'),
-          {
-            title: '增强索引', key: 'enhance', align: 'center',
-            children: [
-              createBuildStatusColumn('摘要', 'prcsSts'),
-              createBuildStatusColumn('Q&A', 'qaSts'),
-              createBuildStatusColumn('图谱', 'tpltSts'),
-            ]
-          },
-          { title: '操作', key: 'option', fixed: 'right', align: 'center', width: 100, render(row) {
-            let options = deepCopy(rowOptions.value)
-            if (authEdit) {
-              options.forEach(option => {
-                if (option.key === 'reindex') {
-                  option.disabled = row.idxSts === 'new' || row.enbSts === 'une'
-                } else {
-                  option.disabled = !authEdit
-                }
-              })
-            }
-            return h(
-              NDropdown,
-              {
-                options,
-                onSelect: (key) => {
-                  switch (key) {
-                    case 'reindex':
-                      onRebuildIndex(row)
-                      break
-                    case 'edit':
-                      onEditDataset(row)
-                      break
-                    case 'delete':
-                      onRemoveDataset(row)
-                      break
-                  }
-                }
-              },
-              h(
-                NButton,
-                {
-                  size: 'small', secondary: true, type: 'primary'
-                },
-                h(
-                  NIcon,
-                  {
-                    class: 'iconfont icon-dotshorizontal'
-                  }
-                )
-              )
-            )}
-          }
-        ],
-        onInitDatasetList,
+        columns,
+        onInitDatasetList, onSorterChange,
         onImportDocument, onInputChange, onCatalogChange,
         createOptions, onCreateSelect
       }

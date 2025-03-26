@@ -1,6 +1,6 @@
 [package]
 name = "wenkb-client"
-version = "0.1.0"
+version = "0.1.8"
 description = "WENKB知识库"
 authors = ["you"]
 edition = "2021"

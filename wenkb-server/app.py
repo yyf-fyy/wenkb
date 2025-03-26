@@ -14,7 +14,7 @@ from contextlib import asynccontextmanager
 from server.core.scheduler.Scheduler import datasetToVectorQueueJob, datasetEnhanceQueueJob
 from server.utils.websocketutils import WebsocketManager
 from server.exception.exception import golbal_exception_handlers, global_exceptions_middleware
-from config.common import DEFAULT_STATIC_DIR_NAME
+from config.common import DEFAULT_STATIC_DIR_NAME, DEFAULT_DOCUMENT_DIR_NAME
 
 from server.db.DbUpgrade import upgrade_db
 upgrade_db()
@@ -31,6 +31,7 @@ app = FastAPI(lifespan=lifespan, debug=True, exception_handlers=golbal_exception
 # 全局未处理的错误处理
 app.middleware('http')(global_exceptions_middleware)
 # 将'static'目录设置为静态文件目录
+app.mount(f'/{DEFAULT_STATIC_DIR_NAME}/{DEFAULT_DOCUMENT_DIR_NAME}', StaticFiles(directory=f'./resources/{DEFAULT_DOCUMENT_DIR_NAME}'), name=DEFAULT_DOCUMENT_DIR_NAME)
 app.mount(f'/{DEFAULT_STATIC_DIR_NAME}', StaticFiles(directory=f'./resources/{DEFAULT_STATIC_DIR_NAME}'), name=DEFAULT_STATIC_DIR_NAME)
 
 router = APIRouter()

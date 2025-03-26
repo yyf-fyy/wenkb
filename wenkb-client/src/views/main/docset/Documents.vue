@@ -76,6 +76,9 @@
             color: var(--primary-color);
           }
         }
+        .n-timeline-item-content__meta {
+          margin-bottom: 10px;
+        }
       }
     }
     .prev, .next {

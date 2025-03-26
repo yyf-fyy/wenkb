@@ -30,9 +30,10 @@
 
 <template>
   <div class="kb-chat-cont">
-    <n-scrollbar ref="scrollbarRef" class="kb-chat-message">
+    <n-scrollbar :id="`c${chatId}`" ref="scrollbarRef" class="kb-chat-message">
       <message v-for="mesg in messageList" :key="mesg.mesgId" :message="mesg" @on-delete-message="onDeleteMessage" @on-regen-message="onRegenMessage" />
       <guess-quest v-if="guessQuestList.length > 0" :quest-list="guessQuestList" @on-quest-change="onQuestChange" />
+      <n-back-top :to="`#c${chatId}`" :right="24" :bottom="32" />
     </n-scrollbar>
     <div class="kb-chat-input">
       <n-input v-model:value="inputValue" autofocus placeholder="输入问题，发送 [Enter]/换行 [Ctrl + Enter]" type="textarea" size="large" :on-input="onInputChange" @keydown="onInputKeyDown"
@@ -211,7 +212,14 @@
           return
         }
         try {
-          let message = JSON.parse(event)
+          let message = {}
+          try {
+            message = JSON.parse(event)
+          } catch (e) {
+            console.error(e)
+            message = eval("(" + event + ")")
+          }
+          
           let type = message.type || ''
           if (type === 'chat_message_entity') {
             let data = message.data || {}

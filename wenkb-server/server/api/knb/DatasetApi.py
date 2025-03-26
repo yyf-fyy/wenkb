@@ -46,7 +46,9 @@ class DatasetApi(BaseApi):
         stmt = select(Dataset).where(Dataset.reposId == reposId, Dataset.dtsetNm.ilike(f'%{dtsetNm}%'))
         if (hasCtlgId):
           stmt = stmt.where(Dataset.ctlgId == ctlgId)
-        stmt = stmt.offset(pageBase.get_offset()).limit(pageBase.pageSize).order_by(Dataset.crtTm.desc())
+        orderName = Dataset.crtTm if pageBase.orderName == '' else getattr(Dataset, pageBase.orderName)
+        orderValue = orderName.asc() if pageBase.orderValue.startswith('asc') else orderName.desc()
+        stmt = stmt.offset(pageBase.get_offset()).limit(pageBase.pageSize).order_by(orderValue)
 
         for row in session.scalars(stmt):
           list.append(row)
@@ -59,8 +61,11 @@ class DatasetApi(BaseApi):
       # 将文件保存到本地再存储到数据集表中
       dtsetId = self.getPk()
       filename = file.filename
+      fileSize = file.size # 单位为字节
       # 获取文件扩展名（类型）
       fileExtension = filename.split('.')[-1]
+      if (fileExtension != ''):
+        fileExtension = fileExtension.lower()
       fileBaseName = filename[:filename.rfind('.')] if '.' in filename else filename
       filePath = DATASET_UPLOAD_FILE_DIR + '/' + dtsetId + '.' + fileExtension
 
@@ -79,7 +84,7 @@ class DatasetApi(BaseApi):
         fileNm = filename,
         fileTyp = fileExtension,
         filePath = filePath,
-        crtTm = datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        crtTm = datetime.now(),
         crtUser = userId
       )
       with session_scope() as session:

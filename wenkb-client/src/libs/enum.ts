@@ -16,7 +16,7 @@ export const FILE_TYPE_ICON_MAP = {
   docx: 'iconfont-kb icon-word1',
   md: 'iconfont-kb icon-markdown',
   html: 'iconfont-kb icon-html5',
-  dcmt: 'iconfont-kb icon-document2',
+  dcmt: 'iconfont-kb icon-document',
   pptx: 'iconfont-kb icon-ppt1',
   mp4: 'iconfont-kb icon-video',
   avi: 'iconfont-kb icon-video',
@@ -29,7 +29,10 @@ export const FILE_TYPE_ICON_MAP = {
   wav: 'iconfont-kb icon-audio',
   ogg: 'iconfont-kb icon-audio',
   flac: 'iconfont-kb icon-audio',
-  link: 'iconfont-kb icon-link1'
+  link: 'iconfont-kb icon-link1',
+  csv: 'iconfont-kb icon-csv',
+  xlsx: 'iconfont-kb icon-excel',
+  xls: 'iconfont-kb icon-excel'
 }
 
 // 团队人员角色

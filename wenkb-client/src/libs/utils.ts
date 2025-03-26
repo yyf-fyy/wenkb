@@ -71,9 +71,9 @@ export const dialogCreate = (useDialog: any, dialogProps: any, component: any, c
         return false
       }
       if ('onPositiveClick' in dialogProps) {
-         let res = dialogProps['onPositiveClick'](data, e, dialog)
+        let res = dialogProps['onPositiveClick'](data, e, dialog)
         if (res === false) {
-          dialog.loading = false
+          // dialog.loading = false
           return false
         }
       } else {

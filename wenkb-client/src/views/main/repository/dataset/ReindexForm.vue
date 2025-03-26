@@ -82,6 +82,10 @@ export default defineComponent({
       disabledTypes.push('qanswer')
     if (!(dataset.tpltSts !== 'nobd' && dataset.tpltSts !== 'new'))
       disabledTypes.push('triplet')
+
+    if (disabledTypes.length === 3) {
+      formData.value.types.push('index')
+    }
     return {
       formVm, formRules, formData,
       disabledTypes,
